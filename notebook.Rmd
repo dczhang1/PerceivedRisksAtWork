@@ -13,4 +13,10 @@ output:
             source('02_clean.R')
 ```
 
-New additions to this file
+# Analyses
+
+```{r}
+cor.test(df_pilot_ss23_long$AFFECT, 
+         df_pilot_ss23_long$INTENT)
+```
+
