@@ -13,10 +13,174 @@ output:
             source('02_clean.R')
 ```
 
+# Assumptions
+
+## Outliers
+```{r}
+mahal <- mahalanobis(df_pilot_ss23_long[ , c(83:88)],
+                     colMeans(df_pilot_ss23_long[ , c(83:88)], na.rm = T),
+                     cov(df_pilot_ss23_long[ , c(83:88)], 
+                         use = "pairwise.complete.obs"))
+
+cutoff <- qchisq(1-.001, ncol(df_pilot_ss23_long[ , c(83:88)]))
+summary(mahal < cutoff)
+noout <- df_pilot_ss23_long[mahal < cutoff, ]
+```
+
+
+## Multicollinearity
+```{r}
+correlation <- cor(noout[ , c(85:88)], use = "pairwise.complete.obs")
+symnum(correlation)
+correlation
+```
+
+
+##Assumptions
+```{r}
+random <- rchisq(nrow(df_pilot_ss23_long), 7)
+fake <- lm(random ~ ., data = df_pilot_ss23_long[ , c(85:88)])
+fitted <- scale(fake$fitted.values)
+standardized <- rstudent(fake)
+```
+
+
+## Linearity
+```{r}
+qqnorm(standardized)
+abline(0,1)
+
+```
+
+### Linearity seems like it could be a bit off so we could potentially use a non parametric test. The other option would be to just recognize that this could reduce power.
+
+
+## Histogram
+```{r}
+hist(standardized)
+
+```
+### Data seems a bit skewed but if we have enough data points it may not be a problem.
+
+
+## Homeostasis
+```{r}
+plot(fitted, standardized)
+abline(0,0)
+abline(v=0)
+```
+
+
 # Analyses
 
+## Correlation
 ```{r}
 cor.test(df_pilot_ss23_long$AFFECT, 
          df_pilot_ss23_long$INTENT)
 ```
+
+## Multilevel Modeling
+### Model 1
+```{r}
+Model1 <- gls(AFFECT ~ 1,
+              data = noout,
+              method = "ML",
+              na.action = "na.omit")
+summary(Model1)
+
+```
+
+### Model 2
+```{r}
+Model2 <- lme(AFFECT ~ 1,
+              data = noout,
+              method = "ML",
+              na.action = "na.omit",
+              random = ~1|subj_id)
+summary(Model2)
+anova(Model1, Model2)
+```
+### Second level - items
+```{r}
+Model2.1 <- lme(AFFECT ~ 1,
+              data = noout,
+              method = "ML",
+              na.action = "na.omit",
+              random = list(~1|subj_id, ~1|TIME))
+summary(Model2.1)
+anova(Model1, Model2, Model2.1)
+
+
+```
+#### Not a significant difference for this model so we should just stick with the participant level nesting.
+
+
+### Predictor Model
+```{r}
+Model3 <- lme(AFFECT ~ INTENT,
+              data = noout,
+              method = "ML",
+              na.action = "na.omit",
+              random = ~1|subj_id)
+summary(Model3)
+anova(Model1, Model2, Model3)
+
+```
+
+### Random Slopes
+```{r}
+Model4 <- lme(AFFECT ~ INTENT,
+              data = noout,
+              method = "ML",
+              na.action = "na.omit",
+              random = ~INTENT|subj_id,
+              control = lmeControl(msMaxIter = 200))
+summary(Model4)
+anova(Model1, Model2, Model3, Model4)
+
+
+```
+#### High correlation means that there is something going on between the intercept and the slopes. As affect perceptions get higer on average the slopes decrease.
+
+#### Model 4 is the best model.
+
+### Assumptions from MLM
+```{r}
+screen <- lme(AFFECT ~ INTENT,
+              data = noout,
+              method = "ML",
+              na.action = "na.omit",
+              random = ~INTENT|subj_id,
+              control = lmeControl(msMaxIter = 200))
+standardized1 <- as.data.frame(scale(screen$residuals))
+standardized1 <- standardized1$fixed
+fitted1 <- scale(fitted.values(screen))
+```
+
+
+#### Colinearity
+```{r}
+qqnorm(standardized1)
+abline(0,1)
+
+```
+##### This looks better.
+
+#### Normality
+```{r}
+hist(standardized1)
+
+```
+##### This also looks better.
+
+#### Homoglogous
+```{r}
+plot(fitted1, standardized1)
+abline(0,0)
+abline(v=0)
+```
+
+
+
+
 
