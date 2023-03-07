@@ -6,7 +6,9 @@
             ### Attention Check
             df_pilot_ss23_wide <- df_pilot_ss23 %>%
                         filter(ATTENTION == 5) %>%
-                        mutate(subj_id = row_number())
+                        mutate(subj_id = row_number()) %>%
+                        mutate(power_dif = POWER_2 - POWER_1) %>%
+                        mutate(power_loss = POWER_3 - POWER_1)
             
             
             
@@ -33,3 +35,5 @@
             df_pilot_ss23_long <- mult.make.univ(
                         x=df_pilot_ss23_wide,
                         dvlist=dvlist)  
+            
+            

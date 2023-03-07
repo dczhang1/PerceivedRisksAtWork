@@ -16,7 +16,66 @@ output:
 # Analyses
 
 ```{r}
-cor.test(df_pilot_ss23_long$AFFECT, 
-         df_pilot_ss23_long$INTENT)
+#center variables
+
+
+#group mean
+df_pilot_ss23_long$center_cost <- df_pilot_ss23_long$COST - ave(df_pilot_ss23_long$COST,df_pilot_ss23_long$subj_id)
+
+df_pilot_ss23_long$center_affect <- df_pilot_ss23_long$AFFECT - ave(df_pilot_ss23_long$AFFECT,df_pilot_ss23_long$subj_id)
+
+df_pilot_ss23_long$center_benefit <- df_pilot_ss23_long$BENEFIT - ave(df_pilot_ss23_long$BENEFIT,df_pilot_ss23_long$subj_id)
+
+df_pilot_ss23_long$center_intent <- df_pilot_ss23_long$INTENT - ave(df_pilot_ss23_long$INTENT,df_pilot_ss23_long$subj_id)
+
+#grand mean
+df_pilot_ss23_long$gmean_GRQ <- df_pilot_ss23_long$GRQ - mean(df_pilot_ss23_long$GRQ)
+
+#Models
+#interceptonly
+interceptonly<-lmer(INTENT ~ 1 + (1|subj_id),data=df_pilot_ss23_long)
+summary(interceptonly)
+confint(interceptonly, level = .90)
+confint(interceptonly, level = .95)
+
+#risk only
+riskonly<-lmer(INTENT ~ 1 + center_affect + 
+                           center_cost + 
+                           (1|subj_id),
+               data=df_pilot_ss23_long)
+summary(riskonly)
+confint(riskonly, level = .90)
+confint(riskonly, level = .95)
+
+#all predictors
+allpred<-lmer(INTENT ~ 1 + center_affect + 
+                          center_cost + 
+                          gmean_GRQ + 
+                          (1|subj_id),
+                        data=df_pilot_ss23_long)
+summary(allpred)
+confint(allpred)
+
+#cross-levelinteraction
+model1<-lmer(INTENT ~ center_affect + 
+                         center_cost + 
+                         power_dif +
+                         POWER_1 + 
+                         center_affect*power_dif +
+                         (POWER_1 | subj_id)
+                         ,data=df_pilot_ss23_long,
+                        REML=TRUE)
+summary(model1)
+confint(model1)
+
+
+
+
+model2<-lmer(Likely ~ cRisk + gndM_GRiPS_T1 + cRisk*gndM_GRiPS_T1 + (cRisk | ID),data=dondata,REML=FALSE)
+summary(model2)
+
+rand(model1) #not working - says can not find function rand
+confint(model2, level = .90) 
+
 ```
 

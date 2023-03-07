@@ -9,6 +9,7 @@
             library(jmv)
             library(apaTables)
             library(multilevel)
+            library(lme4)
             set.seed(6958683) # Set an arbitrary seed for reproducibility
 
 ## Utilities -----
