@@ -30,3 +30,11 @@ Jiang, W., Chai, H., Li, Y., &  Feng, T. (2019). How workplace incivility influ
 Yuan, F., & Woodman, R. W. (2010).  Innovative behavior in the workplace: The role of performance and image outcome expectations. Academy of management journal, 53(2), 323-342.
 
 Lee, K., & Allen, N. J. (2002). Organizational citizenship behavior and workplace deviance: the role of affect and cognitions. Journal of applied psychology, 87(1), 131.
+
+## MLM Resources
+
+http://www.rensenieuwenhuis.nl/r-sessions-16-multilevel-model-specification-lme4/
+
+http://web.pdx.edu/~newsomj/mlrclass/ho_cross-level%20example.pdf
+
+https://www.learn-mlms.com/index.html

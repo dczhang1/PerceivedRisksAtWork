@@ -9,12 +9,6 @@
                         mutate(subj_id = row_number()) %>%
                         mutate(power_dif = POWER_2 - POWER_1) %>%
                         mutate(power_loss = POWER_3 - POWER_1)
-            
-            
-            
-# New Variables--------------------------------------------
-
-
 # Sub-setting Data ----------------------------------------
             
             ### Wide to long for ML Analysis
@@ -35,5 +29,17 @@
             df_pilot_ss23_long <- mult.make.univ(
                         x=df_pilot_ss23_wide,
                         dvlist=dvlist)  
+            
+            
+            
+# New Variables--------------------------------------------
+            #group mean
+            df_pilot_ss23_long$center_cost <- df_pilot_ss23_long$COST - ave(df_pilot_ss23_long$COST,df_pilot_ss23_long$subj_id)
+            df_pilot_ss23_long$center_affect <- df_pilot_ss23_long$AFFECT - ave(df_pilot_ss23_long$AFFECT,df_pilot_ss23_long$subj_id)
+            df_pilot_ss23_long$center_benefit <- df_pilot_ss23_long$BENEFIT - ave(df_pilot_ss23_long$BENEFIT,df_pilot_ss23_long$subj_id)
+            df_pilot_ss23_long$center_intent <- df_pilot_ss23_long$INTENT - ave(df_pilot_ss23_long$INTENT,df_pilot_ss23_long$subj_id)
+            
+            #grand mean
+            df_pilot_ss23_long$gmean_GRQ <- df_pilot_ss23_long$GRQ - mean(df_pilot_ss23_long$GRQ)
             
             

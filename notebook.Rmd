@@ -19,17 +19,7 @@ output:
 #center variables
 
 
-#group mean
-df_pilot_ss23_long$center_cost <- df_pilot_ss23_long$COST - ave(df_pilot_ss23_long$COST,df_pilot_ss23_long$subj_id)
 
-df_pilot_ss23_long$center_affect <- df_pilot_ss23_long$AFFECT - ave(df_pilot_ss23_long$AFFECT,df_pilot_ss23_long$subj_id)
-
-df_pilot_ss23_long$center_benefit <- df_pilot_ss23_long$BENEFIT - ave(df_pilot_ss23_long$BENEFIT,df_pilot_ss23_long$subj_id)
-
-df_pilot_ss23_long$center_intent <- df_pilot_ss23_long$INTENT - ave(df_pilot_ss23_long$INTENT,df_pilot_ss23_long$subj_id)
-
-#grand mean
-df_pilot_ss23_long$gmean_GRQ <- df_pilot_ss23_long$GRQ - mean(df_pilot_ss23_long$GRQ)
 
 #Models
 #interceptonly
@@ -57,18 +47,18 @@ summary(allpred)
 confint(allpred)
 
 #cross-levelinteraction
-model1<-lmer(INTENT ~ center_affect + 
+model1<-lmer(INTENT ~ center_benefit + 
                          center_cost + 
                          power_dif +
-                         POWER_1 + 
-                         center_affect*power_dif +
-                         (POWER_1 | subj_id)
+                         center_cost*power_dif +
+                         (1+power_dif | subj_id)
                          ,data=df_pilot_ss23_long,
                         REML=TRUE)
 summary(model1)
 confint(model1)
-
-
+model_parameters(model1)
+model_performance(model1)
+report(model1)
 
 
 model2<-lmer(Likely ~ cRisk + gndM_GRiPS_T1 + cRisk*gndM_GRiPS_T1 + (cRisk | ID),data=dondata,REML=FALSE)
