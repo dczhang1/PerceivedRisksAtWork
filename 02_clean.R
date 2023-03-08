@@ -6,9 +6,11 @@
             ### Attention Check
             df_pilot_ss23_wide <- df_pilot_ss23 %>%
                         filter(ATTENTION == 5) %>%
-                        mutate(subj_id = row_number()) %>%
-                        mutate(power_dif = POWER_2 - POWER_1) %>%
-                        mutate(power_loss = POWER_3 - POWER_1)
+            ### New variables
+                        mutate(subj_id = row_number()) %>% # Subject ID
+                        mutate(power_dif = POWER_2 - POWER_1) %>% # difference between current aspirational power vs. current power
+                        mutate(power_loss = POWER_3 - POWER_1) # difference between past power vs. current power
+            
 # Sub-setting Data ----------------------------------------
             
             ### Wide to long for ML Analysis
@@ -28,9 +30,7 @@
             # Long to wide using dvlist as index
             df_pilot_ss23_long <- mult.make.univ(
                         x=df_pilot_ss23_wide,
-                        dvlist=dvlist)  
-            
-            
+                        dvlist=dvlist)
             
 # New Variables--------------------------------------------
             #group mean

@@ -1,5 +1,5 @@
 ---
-title: "Your Document Title"
+title: "MLM - Risk Perception"
 author: "Document Author"
 date: "`r Sys.Date()`"
 output:
@@ -13,59 +13,91 @@ output:
             source('02_clean.R')
 ```
 
+# Descriptive
+
+```{r level 2 correlations}
+df_pilot_ss23_wide %>% select(power_dif, power_loss, power_dif, POWER_1, POWER_2, POWER_3, GENDER, GRQ, MANAGER) %>% correlation()
+```
+
 # Analyses
 
+https://www.learn-mlms.com/09-module-9.html
+
+## Intercept Only/Null Model
 ```{r}
-#center variables
+null_model <- lmer(INTENT ~ 1 + (1|subj_id), data = df_pilot_ss23_long, REML = T) # note that REML = FALSE
+performance::icc(null_model)
+```
+
+ICC is interpreted as proportion of variance between people. ICC Value refers to proportion of variance in the DV attributed to the person.
+
+## Adding level 1 fixed effects
+
+```{r}
+fixed_model <- lmer(INTENT ~ 1 + center_benefit + center_cost + (1|subj_id), data = df_pilot_ss23_long, REML = T) # note that REML = FALSE
+summary(fixed_model)
+model_parameters(fixed_model)
+```
+
+```{r compare model}
+model_performance(null_model)
+model_performance(fixed_model)
+# anova(null_model, fixed_model) # different size of dataset
+```
+
+## Adding random slopes
+
+This allows slopes of level 1 predictors to vary across people. 
+
+```{r}
+random_model <- lmer(INTENT ~ 1 + center_benefit + center_cost + (1|subj_id) + 
+                                 (0 + center_benefit|subj_id) + 
+                                 (0 + center_cost|subj_id), 
+                                    data = df_pilot_ss23_long, REML = T) # note that REML = FALSE
+summary(random_model)
+model_parameters(random_model)
+```
+
+## Adding level 2 effects
+
+```{r}
+lv2_model <- lmer(INTENT ~ 1 + center_benefit + center_cost + power_dif + gmean_GRQ + (1|subj_id), data = df_pilot_ss23_long, REML = T) # note that REML = FALSE
+
+lv2_model <- lmer(INTENT ~ 1 + center_benefit + center_cost + POWER_2 + (1|subj_id), data = df_pilot_ss23_long, REML = T) # note that REML = FALSE
+
+lv2_model <- lmer(center_cost ~ 1 + center_benefit + power_dif + (1|subj_id), data = df_pilot_ss23_long, REML = T) # note that REML = FALSE
+
+summary(lv2_model)
+model_parameters(lv2_model)
+```
+## Cross level interaction
+```{r}
+lv2_model <- lmer(INTENT ~ 1 + center_benefit + center_cost + power_dif + gmean_GRQ + power_dif:center_benefit + power_dif:center_cost + (1|subj_id), data = df_pilot_ss23_long, REML = T) # note that REML = FALSE
+summary(lv2_model)
+
+lv2_model <- lmer(COST ~ 1 + POWER_1 + gmean_GRQ + (1|subj_id), data = df_pilot_ss23_long, REML = T) # note that REML = FALSE
+summary(lv2_model)
 
 
-
-
-#Models
-#interceptonly
-interceptonly<-lmer(INTENT ~ 1 + (1|subj_id),data=df_pilot_ss23_long)
-summary(interceptonly)
-confint(interceptonly, level = .90)
-confint(interceptonly, level = .95)
-
-#risk only
-riskonly<-lmer(INTENT ~ 1 + center_affect + 
-                           center_cost + 
-                           (1|subj_id),
-               data=df_pilot_ss23_long)
-summary(riskonly)
-confint(riskonly, level = .90)
-confint(riskonly, level = .95)
-
-#all predictors
-allpred<-lmer(INTENT ~ 1 + center_affect + 
-                          center_cost + 
-                          gmean_GRQ + 
-                          (1|subj_id),
-                        data=df_pilot_ss23_long)
-summary(allpred)
-confint(allpred)
-
-#cross-levelinteraction
-model1<-lmer(INTENT ~ center_benefit + 
-                         center_cost + 
-                         power_dif +
-                         center_cost*power_dif +
-                         (1+power_dif | subj_id)
-                         ,data=df_pilot_ss23_long,
-                        REML=TRUE)
-summary(model1)
-confint(model1)
-model_parameters(model1)
-model_performance(model1)
-report(model1)
-
-
-model2<-lmer(Likely ~ cRisk + gndM_GRiPS_T1 + cRisk*gndM_GRiPS_T1 + (cRisk | ID),data=dondata,REML=FALSE)
-summary(model2)
-
-rand(model1) #not working - says can not find function rand
-confint(model2, level = .90) 
+model_parameters(lv2_model)
 
 ```
+
+## LPA of Power 1 and Power 2
+
+```{r compare models}
+df_pilot_ss23_wide %>%
+    select(POWER_1, POWER_2) %>% 
+    estimate_profiles(1:6) %>% 
+            compare_solutions()
+
+```
+
+```{r}
+df_pilot_ss23_wide %>%
+    select(POWER_1, POWER_2) %>% 
+    estimate_profiles(4) %>% 
+            plot_profiles()
+```
+
 
