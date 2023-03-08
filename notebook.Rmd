@@ -70,6 +70,7 @@ lv2_model <- lmer(center_cost ~ 1 + center_benefit + power_dif + (1|subj_id), da
 summary(lv2_model)
 model_parameters(lv2_model)
 ```
+
 ## Cross level interaction
 ```{r}
 lv2_model <- lmer(INTENT ~ 1 + center_benefit + center_cost + power_dif + gmean_GRQ + power_dif:center_benefit + power_dif:center_cost + (1|subj_id), data = df_pilot_ss23_long, REML = T) # note that REML = FALSE
@@ -87,7 +88,7 @@ model_parameters(lv2_model)
 
 ```{r compare models}
 df_pilot_ss23_wide %>%
-    select(POWER_1, POWER_2) %>% 
+    select(POWER_1, POWER_3) %>% 
     estimate_profiles(1:6) %>% 
             compare_solutions()
 
@@ -96,7 +97,7 @@ df_pilot_ss23_wide %>%
 ```{r}
 df_pilot_ss23_wide %>%
     select(POWER_1, POWER_2) %>% 
-    estimate_profiles(4) %>% 
+    estimate_profiles(3) %>% 
             plot_profiles()
 ```
 
